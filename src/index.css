@@ -8,5 +8,12 @@ body {
   color: white;
 }
 
-code {
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 10px 0 0;
+}
+
+a {
+  color: white;
 }
