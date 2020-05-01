@@ -1,5 +1,5 @@
 {
-  "name": "seven-gis",
+  "name": "seven-guis",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -16,7 +16,7 @@
     "react-dom": "^16.13.1",
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.4.1",
-    "typescript": "~3.7.2",
+    "typescript": "^3.8.3",
     "xstate": "^4.9.0"
   },
   "scripts": {
