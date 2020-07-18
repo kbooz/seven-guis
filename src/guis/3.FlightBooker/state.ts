@@ -2,37 +2,54 @@ import { Machine, assign } from 'xstate';
 
 const toggleTrip = assign<FlightBooker.Context>((ctx) => ({
 	trip: ctx.trip === 'oneWay' ? 'roundTrip' : 'oneWay',
-	backDate: undefined,
+	returnDate: undefined,
 }));
 
-const changeGo = assign<FlightBooker.Context, FlightBooker.Event>(
+const changeStart = assign<FlightBooker.Context, FlightBooker.Event>(
 	(_, event) => ({
-		backDate: event.value || new Date().toISOString(),
+		startDate: event.value,
 	})
 );
 
 const retry = assign<FlightBooker.Context>(() => ({
-	backDate: undefined,
+	returnDate: undefined,
 	error: undefined,
 }));
 
-const changeBack = assign<FlightBooker.Context, FlightBooker.Event>({
-	backDate: (ctx, event) => {
+const changeReturn = assign<FlightBooker.Context, FlightBooker.Event>({
+	returnDate: (ctx, event) => {
 		if (ctx.trip === 'oneWay') return undefined;
 		return event.value || new Date().toISOString();
 	},
 });
 
-const isBackEarlierThanGo = ({ backDate, startDate }: FlightBooker.Context) =>
-	backDate && backDate < startDate;
-
 const setError = assign<FlightBooker.Context, FlightBooker.Event>({
-	// error: (_,e, meta) => meta.
+	error: ({ returnDate, startDate, trip }) => {
+		if (!startDate) return 'NO_START';
+		if (trip === 'roundTrip') {
+			if (!returnDate) return 'NO_RETURN';
+			if (startDate > returnDate) return 'INVALID_RETURN';
+		}
+		return undefined;
+	},
 });
+
+const isStartEarlierThanReturn = ({
+	returnDate,
+	startDate,
+	trip,
+}: FlightBooker.Context) => {
+	if (!startDate) return false;
+	if (trip === 'roundTrip') {
+		if (!returnDate) return false;
+		if (startDate > returnDate) return false;
+	}
+	return true;
+};
 
 const context: FlightBooker.Context = {
 	startDate: undefined,
-	backDate: undefined,
+	returnDate: undefined,
 	trip: 'oneWay',
 };
 
@@ -51,22 +68,20 @@ const FlightBookerMachine = Machine<
 					TOGGLE: {
 						actions: 'toggleTrip',
 					},
-					CHANGE_GO: {
-						actions: 'changeGo',
+					CHANGE_START: {
+						actions: 'changeStart',
 					},
-					CHANGE_BACK: {
-						actions: 'changeBack',
+					CHANGE_RETURN: {
+						actions: 'changeReturn',
 					},
 					SUBMIT: 'submiting',
 				},
 			},
 			submiting: {
-				on: {
-					'': [
-						{ target: 'error', cond: 'isBackEarlierThanGo' },
-						{ target: 'success' },
-					],
-				},
+				always: [
+					{ target: 'success', cond: 'isStartEarlierThanReturn' },
+					{ target: 'error', actions: 'setError' },
+				],
 			},
 			error: {
 				on: {
@@ -84,12 +99,13 @@ const FlightBookerMachine = Machine<
 	{
 		actions: {
 			toggleTrip,
-			changeGo,
-			changeBack,
+			changeStart,
+			changeReturn,
 			retry,
+			setError,
 		},
 		guards: {
-			isBackEarlierThanGo,
+			isStartEarlierThanReturn,
 		},
 	}
 );

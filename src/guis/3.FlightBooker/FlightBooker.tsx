@@ -1,32 +1,45 @@
-import React, { ChangeEvent } from 'react';
+import React, { ChangeEvent, FormEvent } from 'react';
 import { useMachine } from '@xstate/react';
 import FlightBookerMachine from './state';
 
 type InputEvent = ChangeEvent<HTMLInputElement>;
 
+export const renderError = (error: FlightBooker.Errors): string => {
+	switch (error) {
+		case 'INVALID_RETURN':
+			return 'Return flight is earlier than start flight';
+		case 'NO_RETURN':
+			return 'No return flight';
+		case 'NO_START':
+			return 'No start flight';
+		default:
+			return 'Unknown error';
+	}
+};
+
 function FlightBooker() {
 	const [state, send] = useMachine(FlightBookerMachine);
 
-	const { trip, startDate, backDate, error } = state.context;
+	const { trip, startDate, returnDate, error } = state.context;
 
 	const toggleTrip = () => send({ type: 'TOGGLE' });
 
-	const changeGo = ({ target: { value } }: InputEvent) =>
-		send({ type: 'CHANGE_GO', value });
+	const changeStart = ({ target: { value } }: InputEvent) =>
+		send({ type: 'CHANGE_START', value });
 
-	const changeBack = ({ target: { value } }: InputEvent) =>
-		send({ type: 'CHANGE_BACK', value });
+	const changeReturn = ({ target: { value } }: InputEvent) =>
+		send({ type: 'CHANGE_RETURN', value });
 
-	const submit = () => {
+	const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
 		send({ type: 'SUBMIT' });
-		return false;
 	};
 
 	const retry = () => send({ type: 'RETRY' });
 
 	return (
 		<>
-			<form data-testid="form" onSubmit={submit}>
+			<form data-testid="form" onSubmit={onSubmit}>
 				<table>
 					<tbody>
 						<tr>
@@ -46,23 +59,24 @@ function FlightBooker() {
 							<td>
 								<input
 									id="startDate"
+									data-testid="startDate"
 									type="date"
 									value={startDate ?? ''}
-									onChange={changeGo}
+									onChange={changeStart}
 								/>
 							</td>
 						</tr>
 						{trip === 'roundTrip' && (
 							<tr>
 								<td>
-									<label htmlFor="backDate">Back Date</label>
+									<label htmlFor="returnDate">Return Date</label>
 								</td>
 								<td>
 									<input
-										id="backDate"
+										id="returnDate"
 										type="date"
-										value={backDate ?? ''}
-										onChange={changeBack}
+										value={returnDate ?? ''}
+										onChange={changeReturn}
 									/>
 								</td>
 							</tr>
@@ -79,7 +93,7 @@ function FlightBooker() {
 				<>
 					<p data-testid="result">
 						{state.value === 'success' && 'Flight Booked'}
-						{state.value === 'error' && error}
+						{state.value === 'error' && `Error: ${renderError(error)}`}
 					</p>
 					{state.value === 'error' && (
 						<button type="button" onClick={retry}>
