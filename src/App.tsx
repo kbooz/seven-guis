@@ -7,17 +7,6 @@ import FlightBooker from './guis/3.FlightBooker/FlightBooker';
 function App() {
 	return (
 		<Router>
-			<Switch>
-				<Route path="/flights">
-					<FlightBooker />
-				</Route>
-				<Route path="/temperature">
-					<TemperatureConverter />
-				</Route>
-				<Route path="/">
-					<Counter />
-				</Route>
-			</Switch>
 			<ul>
 				<li>
 					<Link to="/">Counter</Link>
@@ -29,6 +18,17 @@ function App() {
 					<Link to="/flights">FlightBooker</Link>
 				</li>
 			</ul>
+			<Switch>
+				<Route path="/flights">
+					<FlightBooker />
+				</Route>
+				<Route path="/temperature">
+					<TemperatureConverter />
+				</Route>
+				<Route path="/">
+					<Counter />
+				</Route>
+			</Switch>
 		</Router>
 	);
 }
