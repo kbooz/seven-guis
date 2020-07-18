@@ -14,8 +14,8 @@ interface TemperatureConverterSchema {
 	states: {
 		active: {
 			states: {
-				CELSIUS: {};
-				FAHRENHEIT: {};
+				CELSIUS: Record<string, unknown>;
+				FAHRENHEIT: Record<string, unknown>;
 			};
 		};
 	};
