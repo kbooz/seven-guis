@@ -17,7 +17,7 @@ export const renderError = (error: FlightBooker.Errors): string => {
 	}
 };
 
-function FlightBooker() {
+function FlightBooker(): JSX.Element {
 	const [state, send] = useMachine(FlightBookerMachine);
 
 	const { trip, startDate, returnDate, error } = state.context;

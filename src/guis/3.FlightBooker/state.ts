@@ -19,18 +19,17 @@ const retry = assign<FlightBooker.Context>(() => ({
 const changeReturn = assign<FlightBooker.Context, FlightBooker.Event>({
 	returnDate: (ctx, event) => {
 		if (ctx.trip === 'oneWay') return undefined;
-		return event.value || new Date().toISOString();
+		return event.value;
 	},
 });
 
 const setError = assign<FlightBooker.Context, FlightBooker.Event>({
 	error: ({ returnDate, startDate, trip }) => {
-		if (!startDate) return 'NO_START';
-		if (trip === 'roundTrip') {
+		if (trip === 'roundTrip' && startDate) {
 			if (!returnDate) return 'NO_RETURN';
 			if (startDate > returnDate) return 'INVALID_RETURN';
 		}
-		return undefined;
+		return 'NO_START';
 	},
 });
 
