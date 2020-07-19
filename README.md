@@ -10,4 +10,4 @@ It doesn't provide any disruptive visuals, neither amazing usability, It's just 
 
 - `yarn start` - for running the react server
 - `yarn test` - for running Jest in watch mode
-- `yarn test --coverage --watchAll=false` - for generating the test coverage report
+- `yarn coverage` - for generating the test coverage report
